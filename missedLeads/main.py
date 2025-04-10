@@ -31,6 +31,5 @@ def check_services():
             logging.error(f"{url} | ERROR | {e}")
             print(f"Send alert to Telegram: {url} not reachable. Error: {e}")
 
-# Запуск
 if __name__ == "__main__":
     check_services()
