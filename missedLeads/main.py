@@ -4,6 +4,8 @@ import logging
 from datetime import datetime
 import schedule
 
+TOKEN = "TOKEN"
+CHAT_ID = "CHAT_ID"
 services = [
     "https://formit.fake",
     "https://datavalidator.fake",
@@ -20,7 +22,13 @@ for url in services:
         "last_code": None,
         "repeat_count": 0
     }
-
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": message}
+    try:
+        requests.post(url, data=payload)
+    except Exception as e:
+        logging.error(f"Ошибка при отправке {e}")
 def check_services():
     for url in services:
         try:
@@ -51,17 +59,18 @@ def check_services():
 
             if notCorrect:
                 msg = (
-                    f"Telegram: Проблема с сервисом {url}\n"
+                    f"Проблема с сервисом {url}\n"
                     f"Код: {status_code}, Повторений: {error_cnt[url]['repeat_count']}, "
                     f"Отклик: {response_time} сек, Время: {datetime.now().strftime('%H:%M:%S')}"
                 )
                 print(msg)
                 logging.warning(msg)
-
+                send_telegram_message(msg)
         except requests.exceptions.RequestException as e:
-            msg = f"Telegram: Сервис {url} недоступен. Ошибка: {e}"
+            msg = f"Сервис {url} недоступен. {e}"
             print(msg)
             logging.error(msg)
+            send_telegram_message(msg)
 
 schedule.every(5).minutes.do(check_services)
 check_services()
